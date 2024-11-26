@@ -1,23 +1,19 @@
+import logging
 import streamlit as st
 
-from money_mate.utils.file_util import scan_uploaded_file
+from money_mate.utils.file_util import get_image_base64
+
+logger = logging.getLogger("money_mate.pages.1_scan_receipt_page")
 
 st.set_page_config(page_title="Scan Receipt")
 
 st.title("Scan Receipt")
 
-uploaded_file = st.file_uploader(
-  "Choose a PNG, JPEG, or PDF file", type=["png", "jpeg", "jpg", "pdf"]
-)
+uploaded_file = st.file_uploader("Choose a PNG, JPG, or JPEG file", type=["png", "jpeg", "jpg"])
 
 if uploaded_file is not None:
-  try:
-    receipt = scan_uploaded_file(uploaded_file)
-  except ValueError:
-    st.warning(f"{uploaded_file.name} is not supported, please upload a PNG, JPEG, or PDF file.")
+  with st.spinner('Parsing the image'):
+    image_base64 = get_image_base64(uploaded_file)
+    receipt = st.session_state.receipt_extraction_agent.scan_image_bytes(image_base64)
+  logger.info(f"Added {receipt} to scanned_receipts")
   st.session_state.scanned_receipts.append(receipt)
-
-
-st.subheader("Recently Scanned Receipts")
-for receipt in st.session_state.scanned_receipts:
-  st.text(f"📑 {receipt.filename} - Scanned at {receipt.timestamp}")
