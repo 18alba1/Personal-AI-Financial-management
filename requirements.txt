@@ -1,9 +1,0 @@
-streamlit
-click
-ruff
-PyPDF2
-pillow
-pytesseract
-langchain
-langchain_openai
-langchain-community langchain-openai pydantic
