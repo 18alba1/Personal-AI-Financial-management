@@ -17,3 +17,5 @@ if uploaded_file is not None:
     receipt = st.session_state.receipt_extraction_agent.scan_image_bytes(image_base64)
   logger.info(f"Added {receipt} to scanned_receipts")
   st.session_state.scanned_receipts.append(receipt)
+  logger.info(f"scanned_receipts has {len(st.session_state.scanned_receipts)} receipts")
+
