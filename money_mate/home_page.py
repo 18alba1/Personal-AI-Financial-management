@@ -1,8 +1,8 @@
 import logging
+
 import streamlit as st
 
 from money_mate.agents.receipt_extraction_agent import ReceiptExtractionAgent
-
 
 # Create a logger for application's namespace
 logger = logging.getLogger("money_mate")
@@ -25,4 +25,5 @@ if "scanned_receipts" not in st.session_state:
 
 if "receipt_extraction_agent" not in st.session_state:
   st.session_state.receipt_extraction_agent = ReceiptExtractionAgent(
-    st.secrets["openai_model"], st.secrets["openai_key"])
+    st.secrets["openai_model"], st.secrets["openai_key"]
+  )

@@ -2,15 +2,8 @@ from typing import Literal, Sequence
 
 from pydantic import BaseModel, Field
 
+ItemCategory = Literal["household", "food", "transportation", "entertainment", "shopping", "other"]
 
-ItemCategory = Literal[
-    "household",
-    "food",
-    "transportation",
-    "entertainment",
-    "shopping",
-    "other"
-]
 
 class Item(BaseModel):
   name: str = Field(description="The name of the item")
