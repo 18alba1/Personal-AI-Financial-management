@@ -4,7 +4,7 @@ import logging
 import os
 import json
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 
 logger = logging.getLogger("money_mate.pages.2_analyze_page")
 
@@ -28,7 +28,61 @@ def load_receipts():
     logger.info("No JSON file found. Starting with an empty list.")
     return []
 
-# Aggregate data for the charts
+def filter_receipts_by_date(receipts, start_date, end_date):
+    """Filter receipts within a given date range."""
+    filtered = [
+        receipt for receipt in receipts
+        if start_date <= datetime.strptime(receipt["date"], "%Y-%m-%d") <= end_date
+    ]
+    return filtered
+
+scanned_receipts = load_receipts()
+
+st.sidebar.title("Filter Options")
+
+# Default date range
+default_start_date = datetime.today() - timedelta(days=30)
+default_end_date = datetime.today()
+
+start_date = st.sidebar.date_input("Start Date", default_start_date)
+end_date = st.sidebar.date_input("End Date", default_end_date)
+
+# Convert to datetime objects
+start_date = datetime.combine(start_date, datetime.min.time())
+end_date = datetime.combine(end_date, datetime.max.time())
+
+st.sidebar.write("Quick Filter Options:")
+
+if st.sidebar.button("Daily"):
+    start_date = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+    end_date = datetime.today().replace(hour=23, minute=59, second=59, microsecond=999999)
+
+if st.sidebar.button("Weekly"):
+    end_date = datetime.today().replace(hour=23, minute=59, second=59, microsecond=999999)
+    start_date = end_date - timedelta(days=7)
+
+if st.sidebar.button("Monthly"):
+    today = datetime.today()
+    start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    if today.month == 12:
+        end_date = today.replace(month=12, day=31, hour=23, minute=59, second=59, microsecond=999999)
+    else:
+        first_day_next_month = today.replace(month=today.month + 1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        end_date = first_day_next_month - timedelta(seconds=1)
+
+if st.sidebar.button("Yearly"):
+    today = datetime.today()
+    start_date = today.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+    end_date = today.replace(month=12, day=31, hour=23, minute=59, second=59, microsecond=999999)
+
+# Filter receipts by date range
+filtered_receipts = filter_receipts_by_date(scanned_receipts, start_date, end_date)
+
+# Debugging Info
+st.sidebar.write(f"Start Date: {start_date}")
+st.sidebar.write(f"End Date: {end_date}")
+
+
 def aggregate_spending_by_category(receipts):
     """Aggregate spending by category."""
     category_totals = defaultdict(float)
@@ -40,7 +94,7 @@ def aggregate_spending_by_category(receipts):
     return category_totals
 
 def aggregate_spending_by_company(receipts):
-    """Aggregate spending by compnay."""
+    """Aggregate spending by company."""
     company_totals = defaultdict(float)
     for receipt in receipts:
         for item in receipt.get("items", []):
@@ -57,18 +111,12 @@ def aggregate_spending_by_date(receipts):
         for item in receipt.get("items", []):
             price = item.get("price", 0.0)
             date_totals[date] += price
-        # Debugging: Print each date's total after processing each receipt
-        logger.info(f"Total for {date}: {date_totals[date]}")
     return date_totals
 
 
-scanned_receipts = load_receipts()
-
-category_totals = aggregate_spending_by_category(scanned_receipts)
-company_totals = aggregate_spending_by_company(scanned_receipts)
-
-# Display the charts
 st.subheader("Spending by Category")
+
+category_totals = aggregate_spending_by_category(filtered_receipts)
 
 if category_totals:
     labels = list(category_totals.keys())
@@ -80,9 +128,12 @@ if category_totals:
 
     st.pyplot(fig)
 else:
-    st.write("No data available to display the pie chart.")
+    st.write("No data available to display the pie chart for categories.")
+
 
 st.subheader("Spending by Company")
+
+company_totals = aggregate_spending_by_company(filtered_receipts)
 
 if company_totals:
     labels = list(company_totals.keys())
@@ -94,14 +145,15 @@ if company_totals:
 
     st.pyplot(fig)
 else:
-    st.write("No data available to display the pie chart.")
+    st.write("No data available to display the pie chart for companies.")
+
 
 st.subheader("Total Spending Over Time")
 
-date_totals = aggregate_spending_by_date(scanned_receipts)
+date_totals = aggregate_spending_by_date(filtered_receipts)
 
 if date_totals:
-    sorted_dates = sorted(date_totals.keys(), key=lambda d: datetime.strptime(d, "%Y-%m-%d"))
+    sorted_dates = sorted(date_totals.keys())
     sorted_totals = [date_totals[date] for date in sorted_dates]
 
     fig, ax = plt.subplots()
