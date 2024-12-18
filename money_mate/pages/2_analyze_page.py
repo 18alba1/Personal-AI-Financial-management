@@ -1,6 +1,6 @@
 import calendar
 import logging
-from datetime import date, timedelta
+from datetime import datetime, date, timedelta
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -121,3 +121,34 @@ if date_totals:
   st.pyplot(fig)
 else:
   st.write("No data available to display the line chart.")
+
+st.divider()  # This creates a visual separation
+
+st.subheader("Quick Stats")
+col1, col2, col3 = st.columns(3)
+if filtered_receipts:
+    total_spent = sum(category_totals.values())
+    num_transactions = len(filtered_receipts)
+    avg_transaction = total_spent / num_transactions if num_transactions > 0 else 0
+    with col1:
+      st.metric("Total Spent", f"${total_spent:.2f}")
+    with col2:  
+      st.metric("Number of Transactions", num_transactions)
+    with col3:
+      st.metric("Average Transaction", f"${avg_transaction:.2f}")
+
+st.subheader("💡 AI Financial Insights")
+#if st.button("Get Quick Insights"):
+earliest_date = datetime.strptime(sorted_dates[0], "%Y-%m-%d").date()
+latest_date = datetime.strptime(sorted_dates[0], "%Y-%m-%d").date() 
+with st.spinner("Analyzing your spending patterns..."):
+    try:
+        insights = st.session_state.receipt_extraction_agent.get_simple_insights(
+            st.session_state.receipt_handler,
+            earliest_date,
+            latest_date
+        )
+        st.markdown(insights)
+    except Exception as e:
+        st.error(f"Error generating insights: {str(e)}")
+        logger.error(f"Error in insights generation: {e}", exc_info=True)
