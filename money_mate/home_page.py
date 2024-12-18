@@ -3,6 +3,7 @@ import logging
 import streamlit as st
 
 from money_mate.agents.receipt_extraction_agent import ReceiptExtractionAgent
+from money_mate.handler.receipt_handler import ReceiptHandler
 
 logger = logging.getLogger("money_mate")
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -13,22 +14,25 @@ logger.setLevel(logging.INFO)
 logger.propagate = False
 
 st.set_page_config(
-    page_title="Welcome to MoneyMate!",
-    page_icon="💰",
+  page_title="Welcome to MoneyMate!",
+  page_icon="💰",
 )
 
 if "scanned_receipts" not in st.session_state:
-    st.session_state.scanned_receipts = []
+  st.session_state.scanned_receipts = []
 
 if "receipt_extraction_agent" not in st.session_state:
-    st.session_state.receipt_extraction_agent = ReceiptExtractionAgent(
-        st.secrets["openai_model"], st.secrets["openai_key"]
-    )
+  st.session_state.receipt_extraction_agent = ReceiptExtractionAgent(
+    st.secrets["openai_model"], st.secrets["openai_key"]
+  )
+
+if "receipt_handler" not in st.session_state:
+  st.session_state.receipt_handler = ReceiptHandler()
 
 st.title("Welcome to MoneyMate! 💰")
 
 st.write(
-    """
+  """
     **MoneyMate** is your personal finance management system powered by AI to help you stay on top of your spending effortlessly.
     With MoneyMate, you can easily analyze your expenses and receive personalized financial insights.
     """
@@ -37,7 +41,7 @@ st.write(
 st.header("How It Works")
 
 st.write(
-    """
+  """
     1. **Scan Your Receipts**:
        - Go to the **Scan Receipt** page and upload your receipts as images.
        - Our AI-powered image recognition will automatically extract key details such as:
