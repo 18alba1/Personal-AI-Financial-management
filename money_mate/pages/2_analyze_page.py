@@ -92,10 +92,11 @@ with col1:
     sizes = list(category_totals.values())
 
     fig, ax = plt.subplots(figsize=(8, 8))
-    ax.pie(sizes, labels=labels, autopct="%1.1f%%", colors=sns.color_palette("Set2"), startangle=90)
+    wedges, texts, autotexts = ax.pie(sizes, labels=labels, autopct="%1.1f%%", colors=sns.color_palette("Set2"), startangle=90)
+    plt.setp(texts, wrap=True)
     ax.axis("equal")
 
-    st.pyplot(fig)
+    st.pyplot(fig, use_container_width=True)
   else:
     st.write("No data available to display the pie chart for categories.")
 
@@ -111,14 +112,17 @@ with col2:
     sizes = list(company_totals.values())
 
     fig, ax = plt.subplots(figsize=(8, 8))
-    ax.pie(
-      sizes, labels=labels, autopct="%1.1f%%", colors=sns.color_palette("Set2_r"), startangle=90
+    wedges, texts, autotexts = ax.pie(
+      sizes, labels=labels, autopct="%1.1f%%", colors=sns.color_palette("Set2_r"), 
+      startangle=90, labeldistance=1.1 
     )
     ax.axis("equal")
 
+    plt.setp(texts, wrap=True)
+
     hole = plt.Circle((0, 0), 0.65, facecolor="white")
     plt.gcf().gca().add_artist(hole)
-    st.pyplot(fig)
+    st.pyplot(fig, use_container_width=True)
   else:
     st.write("No data available to display the pie chart for companies.")
 
@@ -139,11 +143,20 @@ if date_totals:
     y='Total Amount Spent',
     tooltip=['Date', 'Total Amount Spent']
   ).interactive()
+  text = points.mark_text(
+        align='center',
+        baseline='bottom',
+        color='#808080',
+        dy=-7  # Shift text 10 pixels up from the point
+    ).encode(
+        text=alt.Text('Total Amount Spent', format='.2f')  # Format as currency with 2 decimal places
+    )
   line = alt.Chart(chart_data).mark_line().encode(
     x='Date',
     y='Total Amount Spent',
   ).interactive()
-  st.altair_chart(points+line, use_container_width=True)
+  chart = alt.layer(line, points, text).interactive()
+  st.altair_chart(chart, use_container_width=True)
 else:
   st.write("No data available to display the line chart.")
 
