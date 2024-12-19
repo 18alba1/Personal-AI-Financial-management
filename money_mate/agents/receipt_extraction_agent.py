@@ -82,7 +82,7 @@ Let me think through this carefully:
 You are a financial advisor providing brief, focused insights about spending patterns. Based on the provided spending data, give 2-3 key observations and 1 practical suggestion.
 
 Current spending data:
-Total spent: ${total_spent:.2f}
+Total spent: {total_spent:.2f}
 Period: {start_date} to {end_date}
 Spending by category: {category_spending}
 Top merchants: {merchant_spending}
@@ -131,7 +131,7 @@ Keep your response concise and direct, focusing on the most notable patterns and
             start_date=start_date or "earliest",
             end_date=end_date or "latest",
             category_spending=dict(category_totals),
-            merchant_spending=[(m, f"${amt:.2f}") for m, amt in top_merchants]
+            merchant_spending=[(m, f"{amt:.2f}") for m, amt in top_merchants]
         )
 
         # Get insights from LLM

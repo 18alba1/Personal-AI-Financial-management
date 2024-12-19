@@ -3,6 +3,7 @@ import logging
 from datetime import datetime, date, timedelta
 
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import seaborn as sns
 import streamlit as st
 import pandas as pd
@@ -14,45 +15,60 @@ st.set_page_config(page_title="Analyze Finances")
 
 st.title("Analyze Finances")
 
-row1 = st.columns(2)
-col1, col2 = row1
-
-st.sidebar.title("Filter Options")
+mpl.rcParams['font.size'] = 15
 
 
 today = date.today()
-# Get the first day of the current month
-default_start_date = date(today.year, today.month, 1)
-# Get the last day of the current month
-_, last_day = calendar.monthrange(today.year, today.month)
-default_end_date = date(today.year, today.month, last_day)
 
-start_date = st.sidebar.date_input("Start Date", default_start_date)
-end_date = st.sidebar.date_input("End Date", default_end_date)
+col1, col2 = st.columns(2)
 
-st.sidebar.write("Quick Filter Options:")
+with col1:
+    # Quick time range selector
+    time_range = st.selectbox(
+        "Quick Time Range",
+        ["Daily", "Weekly", "Monthly", "Yearly"],
+        index=2,  # Default to Monthly
+        label_visibility="collapsed",
+        placeholder="Quick Time Range"
+    )
 
-if st.sidebar.button("Daily"):
-  start_date = date.today()
-  end_date = date.today()
+with col2:
+    # Custom date range in an expander
+    with st.expander("Custom Date Range"):
+        custom_dates = st.checkbox("Use Custom Date Range", False)
+        if custom_dates:
+            custom_start = st.date_input(
+                "Start Date", 
+                value=date(today.year, today.month, 1),
+                key="custom_start"
+            )
+            custom_end = st.date_input(
+                "End Date", 
+                value=today,
+                key="custom_end"
+            )
 
-if st.sidebar.button("Weekly"):
-  end_date = date.today()
-  # Calculate the start of the current week (Monday)
-  start_date = end_date - timedelta(days=end_date.weekday())
+# Set date range based on selection
+if custom_dates:
+    start_date = custom_start
+    end_date = custom_end
+else:
+    if time_range == "Daily":
+        start_date = date.today()
+        end_date = date.today()
+    elif time_range == "Weekly":
+        end_date = date.today()
+        start_date = end_date - timedelta(days=end_date.weekday())
+    elif time_range == "Monthly":
+        start_date = date(today.year, today.month, 1)
+        _, last_day = calendar.monthrange(today.year, today.month)
+        end_date = date(today.year, today.month, last_day)
+    else:  # Yearly
+        start_date = date(today.year, 1, 1)
+        end_date = date(today.year, 12, 31)
 
-if st.sidebar.button("Monthly"):
-  # First day of current month
-  start_date = date(today.year, today.month, 1)
-  # Last day of current month
-  _, last_day = calendar.monthrange(today.year, today.month)
-  end_date = date(today.year, today.month, last_day)
-
-if st.sidebar.button("Yearly"):
-  # First day of current year
-  start_date = date(today.year, 1, 1)
-  # Last day of current year
-  end_date = date(today.year, 12, 31)
+# Add a caption to show selected date range
+st.caption(f"Showing data from {start_date} to {end_date}")
 
 # Filter receipts by date range
 filtered_receipts = st.session_state.receipt_handler.filter_receipts_by_date(start_date, end_date)
@@ -61,6 +77,8 @@ filtered_receipts = st.session_state.receipt_handler.filter_receipts_by_date(sta
 logger.info(f"Start date: {start_date}")
 logger.info(f"End date: {end_date}")
 
+row1 = st.columns(2)
+col1, col2 = row1
 
 with col1:
   st.subheader("Spending by Category")
@@ -113,9 +131,13 @@ if date_totals:
   sorted_dates = sorted(date_totals.keys())
   sorted_totals = [date_totals[date] for date in sorted_dates]
   chart_data = pd.DataFrame({'Date':sorted_dates, 'Total Amount Spent':sorted_totals})
-  points = alt.Chart(chart_data).mark_circle().encode(
+  points = alt.Chart(chart_data).mark_circle(
+    size=60, 
+    opacity=0.8
+    ).encode(
     x='Date',
     y='Total Amount Spent',
+    tooltip=['Date', 'Total Amount Spent']
   ).interactive()
   line = alt.Chart(chart_data).mark_line().encode(
     x='Date',
@@ -134,11 +156,11 @@ if filtered_receipts:
     num_transactions = len(filtered_receipts)
     avg_transaction = total_spent / num_transactions if num_transactions > 0 else 0
     with col1:
-      st.metric("Total Spent", f"${total_spent:.2f}")
+      st.metric("Total Spent", f"{total_spent:.2f}")
     with col2:  
       st.metric("Number of Transactions", num_transactions)
     with col3:
-      st.metric("Average Transaction", f"${avg_transaction:.2f}")
+      st.metric("Average Transaction", f"{avg_transaction:.2f}")
 
 st.subheader("💡 AI Financial Insights")
 if st.button("Get Quick Insights"):
