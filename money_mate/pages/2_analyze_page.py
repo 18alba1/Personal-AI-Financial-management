@@ -5,6 +5,8 @@ from datetime import datetime, date, timedelta
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
+import pandas as pd
+import altair as alt
 
 logger = logging.getLogger("money_mate.pages.2_analyze_page")
 
@@ -71,7 +73,7 @@ with col1:
     labels = list(category_totals.keys())
     sizes = list(category_totals.values())
 
-    fig, ax = plt.subplots(figsize=(5, 5))
+    fig, ax = plt.subplots(figsize=(8, 8))
     ax.pie(sizes, labels=labels, autopct="%1.1f%%", colors=sns.color_palette("Set2"), startangle=90)
     ax.axis("equal")
 
@@ -90,9 +92,9 @@ with col2:
     labels = list(company_totals.keys())
     sizes = list(company_totals.values())
 
-    fig, ax = plt.subplots(figsize=(5, 5))
+    fig, ax = plt.subplots(figsize=(8, 8))
     ax.pie(
-      sizes, labels=labels, autopct="%1.1f%%", colors=sns.color_palette("Paired"), startangle=90
+      sizes, labels=labels, autopct="%1.1f%%", colors=sns.color_palette("Set2_r"), startangle=90
     )
     ax.axis("equal")
 
@@ -110,15 +112,16 @@ date_totals = st.session_state.receipt_handler.aggregate_spending_by_date(start_
 if date_totals:
   sorted_dates = sorted(date_totals.keys())
   sorted_totals = [date_totals[date] for date in sorted_dates]
-
-  fig, ax = plt.subplots(figsize=(10, 5))
-  ax.plot(sorted_dates, sorted_totals, marker="o", linestyle="-", color="#EDB120")
-  ax.set_xlabel("Date")
-  ax.set_ylabel("Total Amount Spent")
-  ax.set_title("Total Spending Per Date")
-  plt.xticks(rotation=45)
-
-  st.pyplot(fig)
+  chart_data = pd.DataFrame({'Date':sorted_dates, 'Total Amount Spent':sorted_totals})
+  points = alt.Chart(chart_data).mark_circle().encode(
+    x='Date',
+    y='Total Amount Spent',
+  ).interactive()
+  line = alt.Chart(chart_data).mark_line().encode(
+    x='Date',
+    y='Total Amount Spent',
+  ).interactive()
+  st.altair_chart(points+line, use_container_width=True)
 else:
   st.write("No data available to display the line chart.")
 
@@ -138,17 +141,21 @@ if filtered_receipts:
       st.metric("Average Transaction", f"${avg_transaction:.2f}")
 
 st.subheader("💡 AI Financial Insights")
-#if st.button("Get Quick Insights"):
-earliest_date = datetime.strptime(sorted_dates[0], "%Y-%m-%d").date()
-latest_date = datetime.strptime(sorted_dates[0], "%Y-%m-%d").date() 
-with st.spinner("Analyzing your spending patterns..."):
-    try:
-        insights = st.session_state.receipt_extraction_agent.get_simple_insights(
-            st.session_state.receipt_handler,
-            earliest_date,
-            latest_date
-        )
-        st.markdown(insights)
-    except Exception as e:
-        st.error(f"Error generating insights: {str(e)}")
-        logger.error(f"Error in insights generation: {e}", exc_info=True)
+if st.button("Get Quick Insights"):
+  if sorted_dates:
+    earliest_date = datetime.strptime(sorted_dates[0], "%Y-%m-%d").date()
+    latest_date = datetime.strptime(sorted_dates[-1], "%Y-%m-%d").date()
+
+    with st.spinner("Analyzing your spending patterns..."):
+        try:
+            insights = st.session_state.receipt_extraction_agent.get_simple_insights(
+                st.session_state.receipt_handler,
+                earliest_date,
+                latest_date
+            )
+            st.markdown(insights)
+        except Exception as e:
+            st.error(f"Error generating insights: {str(e)}")
+            logger.error(f"Error in insights generation: {e}", exc_info=True)
+  else:
+    st.write("no receipts during period.") 
