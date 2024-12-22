@@ -114,18 +114,15 @@ Keep your response concise and direct, focusing on the most notable patterns and
         """Generate simple financial insights using AI."""
         self.logger.info(f"Generating simple insights for period {start_date} to {end_date}")
         
-        # Get spending data
         category_totals = receipt_handler.aggregate_spending_by_category(start_date, end_date)
         company_totals = receipt_handler.aggregate_spending_by_company(start_date, end_date)
         
         if not category_totals:
             return "No spending data available for this period."
             
-        # Format data for the prompt
         total_spent = sum(category_totals.values())
         top_merchants = sorted(company_totals.items(), key=lambda x: x[1], reverse=True)[:3]
         
-        # Format the prompt with the data
         prompt = self.INSIGHTS_PROMPT.format(
             total_spent=total_spent,
             start_date=start_date or "earliest",
@@ -134,7 +131,6 @@ Keep your response concise and direct, focusing on the most notable patterns and
             merchant_spending=[(m, f"{amt:.2f}") for m, amt in top_merchants]
         )
 
-        # Get insights from LLM
         message = HumanMessage(content=prompt)
         response = self.text_llm.invoke([message])
         

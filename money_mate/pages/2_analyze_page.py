@@ -23,17 +23,15 @@ today = date.today()
 col1, col2 = st.columns(2)
 
 with col1:
-    # Quick time range selector
     time_range = st.selectbox(
         "Quick Time Range",
         ["Daily", "Weekly", "Monthly", "Yearly"],
-        index=2,  # Default to Monthly
+        index=2,  
         label_visibility="collapsed",
         placeholder="Quick Time Range"
     )
 
 with col2:
-    # Custom date range in an expander
     with st.expander("Custom Date Range"):
         custom_dates = st.checkbox("Use Custom Date Range", False)
         if custom_dates:
@@ -48,7 +46,6 @@ with col2:
                 key="custom_end"
             )
 
-# Set date range based on selection
 if custom_dates:
     start_date = custom_start
     end_date = custom_end
@@ -63,14 +60,12 @@ else:
         start_date = date(today.year, today.month, 1)
         _, last_day = calendar.monthrange(today.year, today.month)
         end_date = date(today.year, today.month, last_day)
-    else:  # Yearly
+    else: 
         start_date = date(today.year, 1, 1)
         end_date = date(today.year, 12, 31)
 
-# Add a caption to show selected date range
 st.caption(f"Showing data from {start_date} to {end_date}")
 
-# Filter receipts by date range
 filtered_receipts = st.session_state.receipt_handler.filter_receipts_by_date(start_date, end_date)
 
 # Debugging Info
@@ -147,9 +142,9 @@ if date_totals:
         align='center',
         baseline='bottom',
         color='#808080',
-        dy=-7  # Shift text 10 pixels up from the point
+        dy=-7  
     ).encode(
-        text=alt.Text('Total Amount Spent', format='.2f')  # Format as currency with 2 decimal places
+        text=alt.Text('Total Amount Spent', format='.2f')  
     )
   line = alt.Chart(chart_data).mark_line().encode(
     x='Date',
@@ -160,7 +155,7 @@ if date_totals:
 else:
   st.write("No data available to display the line chart.")
 
-st.divider()  # This creates a visual separation
+st.divider()  
 
 st.subheader("Quick Stats")
 col1, col2, col3 = st.columns(3)
