@@ -1,4 +1,4 @@
-from typing import Literal, Sequence, List
+from typing import Literal, Sequence
 
 from pydantic import BaseModel, Field
 
@@ -17,4 +17,3 @@ class Receipt(BaseModel):
   company: str = Field(description="The name of the company")
   items: Sequence[Item] = Field(description="The list of all items")
   date: str = Field(description="The date of the purchase, in YYYY-MM-DD format")
-  

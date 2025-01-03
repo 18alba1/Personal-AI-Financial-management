@@ -1,11 +1,11 @@
 import logging
+from datetime import date
+from typing import Optional
 
 from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
 
 from money_mate.types.receipt_type import Receipt
-from typing import Optional
-from datetime import date
 
 
 class ReceiptExtractionAgent:
@@ -90,7 +90,6 @@ Top merchants: {merchant_spending}
 Keep your response concise and direct, focusing on the most notable patterns and actionable advice.
 """
 
-
   def __init__(self, model_name: str, api_key: str):
     model = ChatOpenAI(model=model_name, api_key=api_key)
     self.structured_llm = model.with_structured_output(Receipt)
@@ -109,29 +108,31 @@ Keep your response concise and direct, focusing on the most notable patterns and
       ],
     )
     return self.structured_llm.invoke([message])
-  
-  def get_simple_insights(self, receipt_handler, start_date: Optional[date], end_date: Optional[date]) -> str:
-        """Generate simple financial insights using AI."""
-        self.logger.info(f"Generating simple insights for period {start_date} to {end_date}")
-        
-        category_totals = receipt_handler.aggregate_spending_by_category(start_date, end_date)
-        company_totals = receipt_handler.aggregate_spending_by_company(start_date, end_date)
-        
-        if not category_totals:
-            return "No spending data available for this period."
-            
-        total_spent = sum(category_totals.values())
-        top_merchants = sorted(company_totals.items(), key=lambda x: x[1], reverse=True)[:3]
-        
-        prompt = self.INSIGHTS_PROMPT.format(
-            total_spent=total_spent,
-            start_date=start_date or "earliest",
-            end_date=end_date or "latest",
-            category_spending=dict(category_totals),
-            merchant_spending=[(m, f"{amt:.2f}") for m, amt in top_merchants]
-        )
 
-        message = HumanMessage(content=prompt)
-        response = self.text_llm.invoke([message])
-        
-        return response.content
+  def get_simple_insights(
+    self, receipt_handler, start_date: Optional[date], end_date: Optional[date]
+  ) -> str:
+    """Generate simple financial insights using AI."""
+    self.logger.info(f"Generating simple insights for period {start_date} to {end_date}")
+
+    category_totals = receipt_handler.aggregate_spending_by_category(start_date, end_date)
+    company_totals = receipt_handler.aggregate_spending_by_company(start_date, end_date)
+
+    if not category_totals:
+      return "No spending data available for this period."
+
+    total_spent = sum(category_totals.values())
+    top_merchants = sorted(company_totals.items(), key=lambda x: x[1], reverse=True)[:3]
+
+    prompt = self.INSIGHTS_PROMPT.format(
+      total_spent=total_spent,
+      start_date=start_date or "earliest",
+      end_date=end_date or "latest",
+      category_spending=dict(category_totals),
+      merchant_spending=[(m, f"{amt:.2f}") for m, amt in top_merchants],
+    )
+
+    message = HumanMessage(content=prompt)
+    response = self.text_llm.invoke([message])
+
+    return response.content

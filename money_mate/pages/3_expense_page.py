@@ -11,4 +11,4 @@ else:
   st.warning("No receipt history to display.")
 
 
-#st.write(st.session_state.receipt_handler.to_string())
+# st.write(st.session_state.receipt_handler.to_string())
