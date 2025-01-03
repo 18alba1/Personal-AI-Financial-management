@@ -1,5 +1,14 @@
 import streamlit as st
 
-st.set_page_config(page_title="Expanse Manager")
+st.title("Expense History")
+st.write("Below is the table of all your scanned receipts:")
 
-st.title("Expanse Manager")
+df = st.session_state.receipt_handler.to_pandas_dataframe()
+
+if not df.empty:
+  st.dataframe(df)
+else:
+  st.warning("No receipt history to display.")
+
+
+# st.write(st.session_state.receipt_handler.to_string())
