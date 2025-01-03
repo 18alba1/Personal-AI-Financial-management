@@ -1,7 +1,7 @@
 # Personal-AI-Financial-management
 This project:MoneyMate is a personal finance management system powered by AI to help you analyze your expenses by scanning your receipts and receiving personalized financial insights according to them.
 
-## How the website works
+## How to use the MoneyMate web app
 1. Scan Your Receipts on the Scan Receipt page.
 2. View Your Purchase History on the Expense page.
 3. On the Analyze page, gain valuable insights with visualizations.
