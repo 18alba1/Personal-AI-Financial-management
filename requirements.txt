@@ -1,0 +1,8 @@
+python>=3.11,<4.0
+streamlit>=1.40.2
+PyPDF2>=3.0.1
+pytesseract>=0.3.13
+langchain>=0.3.8
+langchain-community>=0.3.8
+langchain-openai>=0.2.10
+matplotlib>=3.9.3
