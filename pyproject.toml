@@ -17,7 +17,10 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-package-mode = false
+package-mode = true
+packages = [
+    {include = "money_mate"}
+]
 
 [project.optional-dependencies]
 test = [
