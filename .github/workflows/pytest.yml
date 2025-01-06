@@ -26,6 +26,3 @@ jobs:
 
       - name: Pytest
         run: coverage run --source=MoneyMate -m pytest -v -s
-
-      - name: Test coverage
-        run: coverage report -m
