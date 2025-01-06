@@ -1,6 +1,11 @@
 [project]
 name = "MoneyMate"
 version = "0.0.1"
+description = "A financial management tool"
+authors = [
+    {name = "Alexander Barhado", email = "abarhado@kth.com"},
+    {name = "Siyu Lu", email = "siyulu@kth.com"},
+]
 dependencies = [
   "streamlit>=1.40.2",
   "PyPDF2>=3.0.1",
