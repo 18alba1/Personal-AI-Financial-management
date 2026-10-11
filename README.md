@@ -2,6 +2,12 @@
 
 MoneyMate is an AI-powered personal finance application that turns receipt images into structured expense data and helps users understand their spending habits. By combining multimodal AI, structured data extraction, financial analytics, and interactive visualizations, MoneyMate makes personal expense tracking easier and more insightful.
 
+
+
+https://github.com/user-attachments/assets/ad8103ec-0f7c-4595-b1de-cb5229bb15c2
+
+
+
 ## ✨ Features
 
 - **AI Receipt Scanning:** Upload receipt images and use an OpenAI-powered vision model to extract merchant names, purchase dates, item names, prices, and expense categories.
